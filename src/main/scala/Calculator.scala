@@ -41,7 +41,7 @@ object Calculator {
   }
 
   def calculate(expression: String): Int = {
-    val stack = new Stack[Int] // kind of state
+    val stack = new Stack[Int] // kind of state : )
 
     for (token <- expression.split(" "))
       if (!handleOperator(token, stack) && !handleNumber(token, stack))
