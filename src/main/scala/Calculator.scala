@@ -1,51 +1,53 @@
 import scala.collection.mutable.Stack
 
 object Calculator {
-  /**
-    * if the token is an operator, pop 2 operands off the stack,
-    * perform the operation and push the result back on
-    */
-  def handleOperator(token: String, stack: Stack[Int]): Boolean = token match {
-    case "+" =>
-      val rhs = stack.pop()
-      val lhs = stack.pop()
-      stack.push(lhs + rhs)
-      true
-    case "-" =>
-      val rhs = stack.pop()
-      val lhs = stack.pop()
-      stack.push(lhs - rhs)
-      true
-    case "*" =>
-      val rhs = stack.pop()
-      val lhs = stack.pop()
-      stack.push(lhs * rhs)
-      true
-    case "/" =>
-      val rhs = stack.pop()
-      val lhs = stack.pop()
-      stack.push(lhs / rhs)
-      true
-    case _ => false
+
+  trait Operator {
+    def operate(lhs: Int, rhs: Int): Int
+  }
+  object Operator {
+    val operators: Map[String, Operator] =
+      Map("+" -> Add, "-" -> Subtract, "*" -> Multiply, "/" -> Divide)
+    def unapply(token: String): Option[Operator] =
+      operators.get(token)
+  }
+  case object Add extends Operator {
+    def operate(lhs: Int, rhs: Int): Int = lhs + rhs
+    override val toString = "+"
+  }
+  case object Subtract extends Operator {
+    def operate(lhs: Int, rhs: Int): Int = lhs - rhs
+    override val toString = "-"
+  }
+  case object Multiply extends Operator {
+    def operate(lhs: Int, rhs: Int): Int = lhs * rhs
+    override val toString = "*"
+  }
+  case object Divide extends Operator {
+    def operate(lhs: Int, rhs: Int): Int = lhs / rhs
+    override val toString = "/"
   }
 
-  /*
-  * if the token is a number, push it on the stack
-  * */
-  def handleNumber(token: String, stack: Stack[Int]): Boolean = try {
-    stack.push(token.toInt)
-    true
-  } catch {
-    case _: NumberFormatException => false
+  object Number {
+    def unapply(token: String): Option[Int] = try {
+      Some(token.toInt)
+    } catch {
+      case _:NumberFormatException => None
+    }
   }
 
   def calculate(expression: String): Int = {
-    val stack = new Stack[Int] // kind of state : )
+    val stack = new Stack[Int]
 
-    for (token <- expression.split(" "))
-      if (!handleOperator(token, stack) && !handleNumber(token, stack))
-        throw new IllegalArgumentException("Invalid token: " + token)
-    stack.pop()
+    for (token <- expression.split(" ")) token match {
+      case Number(num) => stack.push(num)
+      case Operator(op) =>
+        val rhs = stack.pop()
+        val lhs = stack.pop()
+        stack.push(op.operate(lhs, rhs))
+      case _ => throw new IllegalArgumentException("invalid token: " + token)
+    }
+    stack.pop() // return
   }
 
   def main(args: Array[String]): Unit = {
