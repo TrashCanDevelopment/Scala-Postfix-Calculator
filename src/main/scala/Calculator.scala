@@ -29,7 +29,6 @@ object Calculator {
     case _ => false
   }
 
-
   /*
   * if the token is a number, push it on the stack
   * */
@@ -51,7 +50,7 @@ object Calculator {
 
   def main(args: Array[String]): Unit = {
     if (args.length != 1) {
-      throw new IllegalArgumentException("Usage: Calculator <expression>")
+      throw new IllegalArgumentException("Usage: Calculator <expression>") //run "1 1 + 5 +" // 7
     } else {
       println(calculate(args(0)))
     }
